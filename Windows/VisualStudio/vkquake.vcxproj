@@ -74,7 +74,7 @@
     <LibraryPath>$(VK_SDK_PATH)\Lib32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Build-$(ProjectName)\x86\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Build-$(ProjectName)\x86\$(Configuration)\_bins</OutDir>
     <IntDir>Build-$(ProjectName)\x86\$(Configuration)\</IntDir>
     <IncludePath>$(VK_SDK_PATH)\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VK_SDK_PATH)\Lib32;$(LibraryPath)</LibraryPath>
