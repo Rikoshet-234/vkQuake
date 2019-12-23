@@ -117,8 +117,6 @@ typedef struct
 	VkPipeline							current_pipeline;
 	VkClearValue						color_clear_value;
 	VkFormat							swap_chain_format;
-	qboolean							swap_chain_full_screen_exclusive;
-	qboolean							swap_chain_full_screen_acquired;
 	VkPhysicalDeviceProperties			device_properties;
 	VkPhysicalDeviceMemoryProperties	memory_properties;
 	uint32_t							gfx_queue_family_index;
@@ -130,7 +128,6 @@ typedef struct
 
 	// Extensions
 	qboolean							dedicated_allocation;
-	qboolean							full_screen_exclusive;
 
 	// Buffers
 	VkImage								color_buffers[NUM_COLOR_BUFFERS];
@@ -319,8 +316,26 @@ typedef struct
 
 //johnfitz -- moved here from r_brush.c
 extern int gl_lightmap_format, lightmap_bytes;
-#define MAX_LIGHTMAPS 512 //johnfitz -- was 64
-extern gltexture_t *lightmap_textures[MAX_LIGHTMAPS]; //johnfitz -- changed to an array
+
+#define LMBLOCK_WIDTH	256	//FIXME: make dynamic. if we have a decent card there's no real reason not to use 4k or 16k (assuming there's no lightstyles/dynamics that need uploading...)
+#define LMBLOCK_HEIGHT	256 //Alternatively, use texture arrays, which would avoid the need to switch textures as often.
+
+typedef struct glRect_s {
+	unsigned short l,t,w,h;
+} glRect_t;
+struct lightmap_s
+{
+	gltexture_t *texture;
+	glpoly_t	*polys;
+	qboolean	modified;
+	glRect_t	rectchange;
+
+	// the lightmap texture data needs to be kept in
+	// main memory so texsubimage can update properly
+	byte		*data;//[4*LMBLOCK_WIDTH*LMBLOCK_HEIGHT];
+};
+extern struct lightmap_s *lightmap;
+extern int lightmap_count;	//allocated lightmaps
 
 extern qboolean r_drawflat_cheatsafe, r_fullbright_cheatsafe, r_lightmap_cheatsafe, r_drawworld_cheatsafe; //johnfitz
 

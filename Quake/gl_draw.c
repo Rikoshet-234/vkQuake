@@ -544,7 +544,7 @@ void Draw_String (int x, int y, const char *str)
 Draw_Pic -- johnfitz -- modified
 =============
 */
-void Draw_Pic (int x, int y, qpic_t *pic, float alpha)
+void Draw_Pic (int x, int y, qpic_t *pic, float alpha, qboolean alpha_blend)
 {
 	glpic_t			*gl;
 	int	i;
@@ -595,7 +595,10 @@ void Draw_Pic (int x, int y, qpic_t *pic, float alpha)
 	vertices[5] = corner_verts[0];
 
 	vkCmdBindVertexBuffers(vulkan_globals.command_buffer, 0, 1, &buffer, &buffer_offset);
-	R_BindPipeline(vulkan_globals.basic_blend_pipeline[render_pass_index]);
+	if (alpha_blend)
+		R_BindPipeline(vulkan_globals.basic_blend_pipeline[render_pass_index]);
+	else 
+		R_BindPipeline(vulkan_globals.basic_alphatest_pipeline[render_pass_index]);
 	vkCmdBindDescriptorSets(vulkan_globals.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.basic_pipeline_layout, 0, 1, &gl->gltexture->descriptor_set, 0, NULL);
 	vkCmdDraw(vulkan_globals.command_buffer, 6, 1, 0, 0);
 }
@@ -620,7 +623,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, int top, int bottom)
 		oldbottom = bottom;
 		TexMgr_ReloadImage (glt, top, bottom);
 	}
-	Draw_Pic (x, y, pic, 1.0f);
+	Draw_Pic (x, y, pic, 1.0f, false);
 }
 
 /*
@@ -643,7 +646,7 @@ void Draw_ConsoleBackground (void)
 
 	if (alpha > 0.0)
 	{
-		Draw_Pic (0, 0, pic, alpha);
+		Draw_Pic (0, 0, pic, alpha, alpha < 1.0f);
 	}
 }
 
@@ -873,6 +876,8 @@ void GL_SetCanvas (canvastype newcanvas)
 
 	switch(newcanvas)
 	{
+	case CANVAS_NONE:
+		break;
 	case CANVAS_DEFAULT:
 		GL_OrthoMatrix (0, glwidth, glheight, 0, -99999, 99999);
 		GL_Viewport (glx, gly, glwidth, glheight, 0.0f, 1.0f);
@@ -979,6 +984,7 @@ qboolean GL_Set2D (void)
 		
 		const float push_constants[4] = { 1.0f / (float)vid.width, 1.0f / (float)vid.height, (float)vid.width / (float)vid.height, cl.time };
 		vkCmdPushConstants(vulkan_globals.command_buffer, vulkan_globals.screen_warp_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 4 * sizeof(float), push_constants);
+		GL_SetCanvas(CANVAS_NONE); // Invalidate canvas so push constants get set later
 
 		vkCmdBindDescriptorSets(vulkan_globals.command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_globals.screen_warp_pipeline_layout, 0, 1, &vulkan_globals.screen_warp_desc_set, 0, NULL);
 		vkCmdBindPipeline(vulkan_globals.command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_globals.screen_warp_pipeline);
