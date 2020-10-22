@@ -1,6 +1,6 @@
 @echo off
-if exist "%VS150COMNTOOLS%\VsDevCmd.bat" ( 
-call "%VS150COMNTOOLS%\VsDevCmd.bat"
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\Tools\VsDevCmd.bat" ( 
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\Tools\VsDevCmd.bat"
 ) else if exist "%VS140COMNTOOLS%\VsDevCmd.bat" ( 
 call "%VS140COMNTOOLS%\VsDevCmd.bat"
 ) else if exist "%VS120COMNTOOLS%\VsDevCmd.bat" ( 
